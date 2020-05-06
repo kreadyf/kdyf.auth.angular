@@ -3,12 +3,12 @@
  */
 
 // Models
-export * from './lib/models/auth.grant-type.enum';
 export * from './lib/models/auth.models';
 export * from './lib/models/auth-config.model';
 
 // Services
 export * from './lib/services/auth.service';
+export * from './lib/services/auth-config.service';
 export * from './lib/services/auth-guard.service';
 export * from './lib/services/auth-http-interceptor.service';
 

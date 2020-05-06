@@ -1,39 +1,30 @@
-// Angular
-import {CommonModule} from '@angular/common';
 import {NgModule, ModuleWithProviders} from '@angular/core';
-import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
-// NGRX
+import {CommonModule} from '@angular/common';
 import {reducer} from './auth.reducer';
 import {StoreModule} from '@ngrx/store';
-import {AuthEffects} from './auth.effects';
 import {EffectsModule} from '@ngrx/effects';
-import {metaReducers} from './auth.meta-reducer';
-// Services
-import {AuthService} from './services/auth.service';
+import {AuthEffects} from './auth.effects';
 import {AuthGuard} from './services/auth-guard.service';
-import {AuthHttpInterceptor} from './services/auth-http-interceptor.service';
-// Others
 import {AuthConfig} from './models/auth-config.model';
+import {AuthConfigService} from './services/auth-config.service';
+import {HTTP_INTERCEPTORS} from '@angular/common/http';
+import {AuthService} from './services/auth.service';
+import {metaReducers} from './auth.meta-reducer';
+import {AuthHttpInterceptor} from './services/auth-http-interceptor.service';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    HttpClientModule
-  ],
-  declarations: [],
-  exports: []
+  imports: [CommonModule]
 })
 
-export class AuthModule {
+export class AppAuthModule {
   static forRoot(config: AuthConfig): ModuleWithProviders {
     return {
       ngModule: RootAuthModule,
       providers: [
         AuthGuard,
         AuthService,
-        {
-          provide: 'authConfig', useValue: config
-        },
+        AuthConfigService,
+        {provide: 'authConfig', useValue: config},
         {
           provide: HTTP_INTERCEPTORS,
           useClass: AuthHttpInterceptor,
@@ -46,11 +37,10 @@ export class AuthModule {
 
 @NgModule({
   imports: [
-    AuthModule,
+    AppAuthModule,
     StoreModule.forFeature('auth', reducer, {metaReducers}),
     EffectsModule.forFeature([AuthEffects]),
   ],
 })
-
 export class RootAuthModule {
 }
