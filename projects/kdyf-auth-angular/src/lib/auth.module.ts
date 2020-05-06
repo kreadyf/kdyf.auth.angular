@@ -1,16 +1,19 @@
-import {NgModule, ModuleWithProviders} from '@angular/core';
+// Angular
 import {CommonModule} from '@angular/common';
+import {HTTP_INTERCEPTORS} from '@angular/common/http';
+import {NgModule, ModuleWithProviders} from '@angular/core';
+// NGRX
 import {reducer} from './auth.reducer';
 import {StoreModule} from '@ngrx/store';
-import {EffectsModule} from '@ngrx/effects';
 import {AuthEffects} from './auth.effects';
-import {AuthGuard} from './services/auth-guard.service';
-import {AuthConfig} from './models/auth-config.model';
-import {AuthConfigService} from './services/auth-config.service';
-import {HTTP_INTERCEPTORS} from '@angular/common/http';
-import {AuthService} from './services/auth.service';
+import {EffectsModule} from '@ngrx/effects';
 import {metaReducers} from './auth.meta-reducer';
+// Services
+import {AuthGuard} from './services/auth-guard.service';
+import {AuthService} from './services/auth.service';
 import {AuthHttpInterceptor} from './services/auth-http-interceptor.service';
+// Others
+import {AuthConfig} from './models/auth-config.model';
 
 @NgModule({
   imports: [CommonModule]
@@ -23,7 +26,6 @@ export class AppAuthModule {
       providers: [
         AuthGuard,
         AuthService,
-        AuthConfigService,
         {provide: 'authConfig', useValue: config},
         {
           provide: HTTP_INTERCEPTORS,

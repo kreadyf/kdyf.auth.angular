@@ -1,11 +1,16 @@
-import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {Observable,} from 'rxjs';
-import {map} from 'rxjs/operators';
+// Angular
+import {Inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {AuthConfigService} from './auth-config.service';
-import {AuthenticateResponse, AuthenticateByLogin, User} from '../models/auth.models';
+// RXJS
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+// NGRX
+import {Store} from '@ngrx/store';
+// Modules
 import {JwtHelperService} from '@auth0/angular-jwt';
+// Others
+import {AuthConfig} from '../models/auth-config.model';
+import {AuthenticateResponse, AuthenticateByLogin, User} from '../models/auth.models';
 
 const jwtHelper = new JwtHelperService();
 
@@ -13,24 +18,24 @@ const jwtHelper = new JwtHelperService();
 export class AuthService {
 
 
-  constructor(private http: HttpClient, private configService: AuthConfigService, private store: Store<any>) {
+  constructor(private http: HttpClient, @Inject('authConfig') private config: AuthConfig, private store: Store<any>) {
 
   }
 
   login(credentials: AuthenticateByLogin): Observable<{ user: User, authenticate: AuthenticateResponse }> {
-    const config = this.configService.Get();
 
-    return this.http.post(`${config.loginUrl}`, {Username: credentials.username, Password: credentials.password})
+    return this.http.post(`${this.config.loginUrl}`, {Username: credentials.username, Password: credentials.password})
       .pipe<{ user: User, authenticate: AuthenticateResponse }>(
         map((data: any) => {
-          return {user: this.parseToken(data.Data), authenticate: {authToken: data.Data, refreshToken: undefined}};
+          return {user: data.username, authenticate: {authToken: data.token, refreshToken: undefined}};
         })
       );
-  }
 
+  }
 
   parseToken(token: string): User {
     const obj = jwtHelper.decodeToken(token);
     return {username: obj.unique_name, email: obj.email, displayName: obj.display_name, roles: obj.roles};
   }
+
 }

@@ -11,7 +11,7 @@ export enum AuthActionTypes {
 
   RequestAuthenticationFailure = '[Auth]RequestAuthenticationFailure',
   RequestAuthorizationFailure = '[Auth]RequestAuthorizationFailure'
-};
+}
 
 export class Login implements Action {
   readonly type = AuthActionTypes.Login;

@@ -1,3 +1,3 @@
 export class AuthConfig {
-    loginUrl: string;
+  loginUrl: string;
 }
