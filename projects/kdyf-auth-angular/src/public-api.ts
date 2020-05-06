@@ -3,7 +3,6 @@
  */
 
 // Models
-export * from './lib/models/auth.grant-type.enum';
 export * from './lib/models/auth.models';
 export * from './lib/models/auth-config.model';
 

@@ -1,6 +1,6 @@
 // Angular
 import {Injectable} from '@angular/core';
-import {CanActivate,} from '@angular/router';
+import {CanActivate} from '@angular/router';
 // RXJS
 import {Observable} from 'rxjs';
 import {map, take} from 'rxjs/operators';
@@ -10,6 +10,7 @@ import {Store, select} from '@ngrx/store';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+
   constructor(private store: Store<any>) {
   }
 
@@ -23,11 +24,11 @@ export class AuthGuard implements CanActivate {
       select((s: any) => s.auth.user),
       map(user => {
         if (!user) {
-          this.store.dispatch(new Auth.LoginRedirect({urlRedirect: undefined}));
+          this.store.dispatch(new Auth.LoginRedirect());
           return false;
         }
         return true;
       }), take(1));
-    ;
   }
+
 }

@@ -1,66 +1,22 @@
 import {Action} from '@ngrx/store';
-import {
-  User,
-  AuthenticateByLogin,
-  AuthenticateByRefreshToken,
-  AuthenticateResponse,
-  AuthenticateBySamlToken,
-  AuthenticateByAzureAdToken
-} from './models/auth.models';
-import {GrantType} from './models/auth.grant-type.enum';
+import {User, AuthenticateByLogin, AuthenticateResponse} from './models/auth.models';
 
 export enum AuthActionTypes {
   Login = '[Auth]Login',
-  RefreshToken = '[Auth]RefreshToken',
+  Logout = '[Auth]Logout',
+  LoginRedirect = '[Auth]LoginRedirect',
 
   AuthenticationSuccess = '[Auth]AuthenticationSuccess',
   AuthenticationFailure = '[Auth]AuthenticationFailure',
 
-  Logout = '[Auth]Logout',
-
-  LoginRedirect = '[Auth]LoginRedirect',
-
-  Authorize = '[Auth]Authorize',
-  AuthorizationSuccess = '[Auth]AuthorizationSuccess',
-  AuthorizationFailure = '[Auth]AuthorizationFailure',
-
   RequestAuthenticationFailure = '[Auth]RequestAuthenticationFailure',
-  RequestAuthorizationFailure = '[Auth]RequestAuthorizationFailure',
-
-  SamlInitLogin = '[Auth]SamlInitLogin',
-  AzureAdInitLogin = '[Auth]AzureAdInitLogin'
+  RequestAuthorizationFailure = '[Auth]RequestAuthorizationFailure'
 }
-
-export type AuthActions =
-  | Login
-  | RefreshToken
-  | AuthenticationSuccess
-  | AuthenticationFailure
-  | Logout
-  | LoginRedirect
-  | Authorize
-  | AuthorizationSuccess
-  | AuthorizationFailure
-  | RequestAuthenticationFailure
-  | RequestAuthorizationFailure
-  | SamlInitLogin
-  | AzureAdInitLogin;
 
 export class Login implements Action {
   readonly type = AuthActionTypes.Login;
 
-  constructor(public payload: {
-    grantType: GrantType,
-    credentials: AuthenticateByLogin | AuthenticateBySamlToken | AuthenticateByAzureAdToken,
-    keepLoggedIn: boolean
-  }) {
-  }
-}
-
-export class RefreshToken implements Action {
-  readonly type = AuthActionTypes.RefreshToken;
-
-  constructor(public payload: AuthenticateByRefreshToken) {
+  constructor(public payload: { credentials: AuthenticateByLogin }) {
   }
 }
 
@@ -78,28 +34,6 @@ export class AuthenticationFailure implements Action {
   }
 }
 
-export class Authorize implements Action {
-  readonly type = AuthActionTypes.Authorize;
-
-  constructor(public authToken: string) {
-
-  }
-}
-
-export class AuthorizationFailure implements Action {
-  readonly type = AuthActionTypes.AuthorizationFailure;
-
-  constructor(public payload: { error: string }) {
-  }
-}
-
-export class AuthorizationSuccess implements Action {
-  readonly type = AuthActionTypes.AuthorizationSuccess;
-
-  constructor(public payload: { policies: string[] }) {
-  }
-}
-
 export class Logout implements Action {
   readonly type = AuthActionTypes.Logout;
 }
@@ -107,7 +41,7 @@ export class Logout implements Action {
 export class LoginRedirect implements Action {
   readonly type = AuthActionTypes.LoginRedirect;
 
-  constructor(public payload: { urlRedirect: string }) {
+  constructor() {
   }
 }
 
@@ -119,17 +53,11 @@ export class RequestAuthorizationFailure implements Action {
   readonly type = AuthActionTypes.RequestAuthorizationFailure;
 }
 
-export class SamlInitLogin implements Action {
-  readonly type = AuthActionTypes.SamlInitLogin;
-
-  constructor(public payload: { keepLoggedIn: boolean } = {keepLoggedIn: false}) {
-  }
-
-}
-
-export class AzureAdInitLogin implements Action {
-  readonly type = AuthActionTypes.AzureAdInitLogin;
-
-  constructor(public payload: { keepLoggedIn: boolean } = {keepLoggedIn: false}) {
-  }
-}
+export type AuthActions =
+  | Login
+  | AuthenticationSuccess
+  | AuthenticationFailure
+  | Logout
+  | LoginRedirect
+  | RequestAuthenticationFailure
+  | RequestAuthorizationFailure;
