@@ -7,7 +7,7 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "build-prod": "ng build kdyf-auth-angular"
+    "build-prod": "ng build kdyf-auth-angular --prod"
   },
   "private": true,
   "dependencies": {
