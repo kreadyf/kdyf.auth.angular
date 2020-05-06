@@ -1,15 +1,19 @@
-import {NgModule, ModuleWithProviders} from '@angular/core';
+// Angular
 import {CommonModule} from '@angular/common';
+import {NgModule, ModuleWithProviders} from '@angular/core';
+import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
+// NGRX
 import {reducer} from './auth.reducer';
 import {StoreModule} from '@ngrx/store';
-import {EffectsModule} from '@ngrx/effects';
 import {AuthEffects} from './auth.effects';
-import {AuthGuard} from './services/auth-guard.service';
-import {AuthConfig} from './models/auth-config.model';
-import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
-import {AuthService} from './services/auth.service';
+import {EffectsModule} from '@ngrx/effects';
 import {metaReducers} from './auth.meta-reducer';
+// Services
+import {AuthService} from './services/auth.service';
+import {AuthGuard} from './services/auth-guard.service';
 import {AuthHttpInterceptor} from './services/auth-http-interceptor.service';
+// Others
+import {AuthConfig} from './models/auth-config.model';
 
 @NgModule({
   imports: [
@@ -47,5 +51,6 @@ export class AuthModule {
     EffectsModule.forFeature([AuthEffects]),
   ],
 })
+
 export class RootAuthModule {
 }

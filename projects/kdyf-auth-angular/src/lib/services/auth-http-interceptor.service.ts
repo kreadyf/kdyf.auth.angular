@@ -38,7 +38,7 @@ export class AuthHttpInterceptor implements HttpInterceptor {
 
     return next.handle(this.addToken(req)).pipe(
       catchError(error => {
-        if (error instanceof HttpErrorResponse && (<HttpErrorResponse>error).status == 401) {
+        if (error instanceof HttpErrorResponse && (<HttpErrorResponse> error).status == 401) {
           return this.handle401Error(req, next);
         } else {
           return throwError(error); // check
@@ -48,8 +48,9 @@ export class AuthHttpInterceptor implements HttpInterceptor {
   }
 
   addToken(req: HttpRequest<any>): HttpRequest<any> {
-    if (!localStorage.getItem('authenticate'))
+    if (!localStorage.getItem('authenticate')) {
       return req;
+    }
     return req.clone({setHeaders: {Authorization: 'Bearer ' + this.loadToken()}});
   }
 
@@ -68,7 +69,7 @@ export class AuthHttpInterceptor implements HttpInterceptor {
       withLatestFrom(this.store),
       exhaustMap(([action, storeState]) => {
 
-        if ((<any>action).type == AuthActionTypes.AuthenticationSuccess) {
+        if ((<any> action).type == AuthActionTypes.AuthenticationSuccess) {
           return next.handle(this.addToken(req));
         } else {
           return throwError(new HttpResponse({status: 401})); // check
