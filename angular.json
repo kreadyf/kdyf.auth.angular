@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "kdyf-auth": {
+    "libraries": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -66,18 +66,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "kdyf-auth:build"
+            "browserTarget": "libraries:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "kdyf-auth:build:production"
+              "browserTarget": "libraries:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "kdyf-auth:build"
+            "browserTarget": "libraries:build"
           }
         },
         "test": {
@@ -114,11 +114,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "kdyf-auth:serve"
+            "devServerTarget": "libraries:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "kdyf-auth:serve:production"
+              "devServerTarget": "libraries:serve:production"
             }
           }
         }
@@ -164,5 +164,5 @@
         }
       }
     }},
-  "defaultProject": "kdyf-auth"
+  "defaultProject": "libraries"
 }
