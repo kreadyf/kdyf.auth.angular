@@ -1,8 +1,12 @@
+// Angular
 import {Injectable, Inject} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {Observable, forkJoin, of, throwError} from 'rxjs';
-import {map, catchError} from 'rxjs/operators';
 import {HttpClient, HttpParams, HttpHeaders, HttpParameterCodec} from '@angular/common/http';
+// RXJS
+import {map, catchError} from 'rxjs/operators';
+import {Observable, forkJoin, of, throwError} from 'rxjs';
+// NGRX
+import {Store} from '@ngrx/store';
+// Others
 import {
   AuthenticateResponse,
   AuthenticateByLogin,
@@ -13,7 +17,7 @@ import {
 } from '../../models/auth.models';
 import {JwtHelperService} from '@auth0/angular-jwt';
 import {GrantType} from '../../models/auth.grant-type.enum';
-import {AuthConfig} from '../../models/auth-config.model';
+import {Configuration} from '../../models/configuration.model';
 
 const jwtHelper = new JwtHelperService();
 const FORM_ENCODED_HTTP_HEADERS: HttpHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
@@ -39,59 +43,63 @@ export class CustomQueryEncoderHelper implements HttpParameterCodec {
 @Injectable()
 export class AuthAzureAdService {
 
-
-  constructor(private http: HttpClient, @Inject('authConfig') private config: AuthConfig, private store: Store<any>) {
+  constructor(private http: HttpClient,
+              private store: Store<any>,
+              @Inject('authConfig') private config: Configuration) {
   }
 
   initSaml(): void {
-    document.location.href = `${this.config.loginHost}${this.config.samlInitUrl}`;
+    document.location.href = `${this.config.authConfig.loginHost}${this.config.authConfig.samlInitUrl}`;
   }
 
   initAzureAd(): void {
-    document.location.href = `${this.config.urlCode}response_type=${this.config.response_type}&state=${this.config.state}&client_id=${this.config.azureAdClientId}&redirect_uri=${this.config.azureAdRedirectUri}&scope=${this.config.scope}&prompt=select_account`;
+    document.location.href = `${this.config.authConfig.urlCode}response_type=${this.config.authConfig.response_type}&state=${this.config.authConfig.state}&client_id=${this.config.authConfig.azureAdClientId}&redirect_uri=${this.config.authConfig.azureAdRedirectUri}&scope=${this.config.authConfig.scope}&prompt=select_account`;
   }
 
   login(grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken | AuthenticateByAzureAdToken): Observable<{ user: User, authenticate: AuthenticateResponse }> {
 
     let body = new HttpParams({encoder: new CustomQueryEncoderHelper()});
-    let loginHost = `${this.config.loginHost}/connect/token`;
+    const loginHost = `${this.config.authConfig.loginHost}/connect/token`;
 
-    if (grantType == GrantType.PASSWORD) {
-      let passwordCredentials = <AuthenticateByLogin> credentials;
+    if (grantType === GrantType.PASSWORD) {
+      const passwordCredentials = <AuthenticateByLogin> credentials;
       body = body
-        .set('client_id', this.config.clientId)
-        .set('client_secret', this.config.clientSecret)
+        .set('client_id', this.config.authConfig.clientId)
+        .set('client_secret', this.config.authConfig.clientSecret)
         .set('grant_type', 'password')
         .set('username', passwordCredentials.username)
         .set('password', passwordCredentials.password)
-        .set('acr_values', `tenant:${passwordCredentials.tenant} authtype:${this.config.authType}`);
-    } else if (grantType == GrantType.SAML) {
-      let samlCredentials = <AuthenticateBySamlToken> credentials;
+        .set('acr_values', `tenant:${passwordCredentials.tenant} authtype:${this.config.authConfig.authType}`);
+    } else if (grantType === GrantType.SAML) {
+      const samlCredentials = <AuthenticateBySamlToken> credentials;
       body = body;
       body = body
-        .set('client_id', this.config.clientId)
-        .set('client_secret', this.config.clientSecret)
+        .set('client_id', this.config.authConfig.clientId)
+        .set('client_secret', this.config.authConfig.clientSecret)
         .set('grant_type', 'saml')
         .set('SAMLResponse', samlCredentials.samlToken);
-    } else if (grantType == GrantType.AZUREAD) {
-      let azureAdCredentials = <AuthenticateByAzureAdToken> credentials;
+    } else if (grantType === GrantType.AZUREAD) {
+      const azureAdCredentials = <AuthenticateByAzureAdToken> credentials;
       body = body
-        .set('client_id', this.config.azureAdClientId)
-        .set('client_secret', this.config.azureAdClientSecret)
-        .set('grant_type', this.config.azureAdGrantType)
-        .set('redirect_uri', this.config.azureAdRedirectUri)
+        .set('client_id', this.config.authConfig.azureAdClientId)
+        .set('client_secret', this.config.authConfig.azureAdClientSecret)
+        .set('grant_type', this.config.authConfig.azureAdGrantType)
+        .set('redirect_uri', this.config.authConfig.azureAdRedirectUri)
         .set('code', azureAdCredentials.code);
     }
 
-    return this.http.post(`${this.config.loginHost}${this.config.azureAdTenantId}`, body, {headers: FORM_ENCODED_HTTP_HEADERS})
-      .pipe<{ user: User, authenticate: AuthenticateResponse }>(
-        map((data: any) => {
-          return {
-            user: this.parseToken(data.access_token),
-            authenticate: {authToken: data.access_token, refreshToken: data.refresh_token}
-          };
-        })
-      );
+    return this.http.post(
+      `${this.config.authConfig.loginHost}${this.config.authConfig.azureAdTenantId}`,
+      body,
+      {headers: FORM_ENCODED_HTTP_HEADERS}
+    ).pipe<{ user: User, authenticate: AuthenticateResponse }>(
+      map((data: any) => {
+        return {
+          user: this.parseToken(data.access_token),
+          authenticate: {authToken: data.access_token, refreshToken: data.refresh_token}
+        };
+      })
+    );
   }
 
   refreshToken(refreshToken: AuthenticateByRefreshToken): Observable<{ user: User, authenticate: AuthenticateResponse }> {
@@ -101,26 +109,29 @@ export class AuthAzureAdService {
 
 
     const body = new HttpParams()
-      .set('client_id', this.config.azureAdClientId)
-      .set('client_secret', this.config.azureAdClientSecret)
+      .set('client_id', this.config.authConfig.azureAdClientId)
+      .set('client_secret', this.config.authConfig.azureAdClientSecret)
       .set('grant_type', 'refresh_token')
       // .set('resource', config.resource)
       .set('refresh_token', refreshToken.refreshToken)
-      .set('scope', this.config.scope);
+      .set('scope', this.config.authConfig.scope);
 
-    return this.http.post(`${this.config.loginHost}${this.config.azureAdTenantId}`, body, {headers: FORM_ENCODED_HTTP_HEADERS})
-      .pipe(
-        map((data: any) => {
-          return {
-            user: this.parseToken(data.access_token),
-            authenticate: {authToken: data.access_token, refreshToken: data.refresh_token}
-          };
-        })
-      );
+    return this.http.post(
+      `${this.config.authConfig.loginHost}${this.config.authConfig.azureAdTenantId}`,
+      body,
+      {headers: FORM_ENCODED_HTTP_HEADERS}
+    ).pipe(
+      map((data: any) => {
+        return {
+          user: this.parseToken(data.access_token),
+          authenticate: {authToken: data.access_token, refreshToken: data.refresh_token}
+        };
+      })
+    );
   }
 
   parseToken(token: string): User {
-    var obj = jwtHelper.decodeToken(token);
+    const obj = jwtHelper.decodeToken(token);
     return {username: obj.unique_name, tenant: obj.tenant, displayName: obj.name};
   }
 
@@ -141,7 +152,7 @@ export class AuthAzureAdService {
 
   /**only for one request*/
   checkAndUpdateAuthorization(): Observable<string[]> {
-    let authorizationEndpoints = this.config.authorization;
+    const authorizationEndpoints = this.config.authConfig.authorization;
     if (!authorizationEndpoints) {
       return of([]);
     }

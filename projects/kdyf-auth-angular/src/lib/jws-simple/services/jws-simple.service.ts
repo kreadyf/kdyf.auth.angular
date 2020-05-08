@@ -9,8 +9,8 @@ import {Store} from '@ngrx/store';
 // Modules
 import {JwtHelperService} from '@auth0/angular-jwt';
 // Others
-import {AuthConfig} from '../../models/auth-config.model';
 import {AuthenticateResponse, AuthenticateByLogin, User} from '../../models/auth.models';
+import {Configuration} from '../../models/configuration.model';
 
 const jwtHelper = new JwtHelperService();
 
@@ -18,18 +18,22 @@ const jwtHelper = new JwtHelperService();
 export class JwsSimpleService {
 
 
-  constructor(private http: HttpClient, @Inject('authConfig') private config: AuthConfig, private store: Store<any>) {
+  constructor(private http: HttpClient,
+              private store: Store<any>,
+              @Inject('authConfig') private config: Configuration) {
 
   }
 
   login(credentials: AuthenticateByLogin): Observable<{ user: User, authenticate: AuthenticateResponse }> {
 
-    return this.http.post(`${this.config.loginUrl}`, {Username: credentials.username, Password: credentials.password})
-      .pipe<{ user: User, authenticate: AuthenticateResponse }>(
-        map((data: any) => {
-          return {user: data.username, authenticate: {authToken: data.token, refreshToken: undefined}};
-        })
-      );
+    return this.http.post(
+      `${this.config.authConfig.loginUrl}`,
+      {Username: credentials.username, Password: credentials.password}
+    ).pipe<{ user: User, authenticate: AuthenticateResponse }>(
+      map((data: any) => {
+        return {user: data.username, authenticate: {authToken: data.token, refreshToken: undefined}};
+      })
+    );
 
   }
 

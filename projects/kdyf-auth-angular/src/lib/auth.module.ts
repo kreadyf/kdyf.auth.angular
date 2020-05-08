@@ -25,7 +25,7 @@ import {EikonGuard} from './eikon/services/eikon.guard';
 import {JwsSimpleGuard} from './jws-simple/services/jws-simple.guard';
 import {AuthAzureAdGuard} from './azure-ad/services/auth-azure-ad.guard';
 // Others
-import {AuthConfig} from './models/auth-config.model';
+import {Configuration} from './models/configuration.model';
 
 @NgModule({
   imports: [
@@ -37,7 +37,7 @@ import {AuthConfig} from './models/auth-config.model';
 })
 
 export class AuthModule {
-  static forRoot(config: AuthConfig): ModuleWithProviders {
+  static forRoot(config: Configuration): ModuleWithProviders {
     return {
       ngModule: RootAuthModule,
       providers: [
