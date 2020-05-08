@@ -1,10 +1,6 @@
 import {Observable, throwError} from 'rxjs';
 import {Injectable} from '@angular/core';
-import {HttpInterceptor, HttpErrorResponse, HttpResponse} from '@angular/common/http';
-import {HttpRequest} from '@angular/common/http';
-import {HttpHandler} from '@angular/common/http';
-import {HttpEvent} from '@angular/common/http';
-import 'rxjs/add/observable/fromPromise';
+import {HttpInterceptor, HttpErrorResponse, HttpResponse, HttpRequest, HttpHandler, HttpEvent} from '@angular/common/http';
 import {Store, ActionsSubject} from '@ngrx/store';
 import {BehaviorSubject} from 'rxjs';
 import {tap, catchError, finalize, withLatestFrom, exhaustMap} from 'rxjs/operators';
