@@ -26,6 +26,7 @@ import {JwsSimpleGuard} from './jws-simple/services/jws-simple.guard';
 import {AuthAzureAdGuard} from './azure-ad/services/auth-azure-ad.guard';
 // Others
 import {Configuration} from './models/configuration.model';
+import {EikonConfigService} from './eikon/services/eikon-config.service';
 
 @NgModule({
   imports: [
@@ -48,6 +49,8 @@ export class AuthModule {
         AuthAzureAdService,
         EikonService,
         JwsSimpleService,
+
+        EikonConfigService,
 
         {
           provide: HTTP_INTERCEPTORS,
