@@ -8,6 +8,7 @@ import {
   AuthenticateByAzureAdToken
 } from '../models/auth.models';
 import {GrantType} from '../models/auth.grant-type.enum';
+import {ProviderType} from '../models/provider.enum';
 
 export enum AuthActionTypes {
   Login = '[Auth]Login',
@@ -37,6 +38,7 @@ export class Login implements Action {
   constructor(public payload: {
     grantType: GrantType,
     credentials: AuthenticateByLogin | AuthenticateBySamlToken | AuthenticateByAzureAdToken,
+    typeAuth: ProviderType,
     keepLoggedIn: boolean
   }) {
   }

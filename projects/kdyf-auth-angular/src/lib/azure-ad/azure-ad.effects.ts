@@ -10,12 +10,13 @@ import {
   SamlInitLogin, AzureAdInitLogin, Authorize, AuthorizationSuccess, AuthorizationFailure
 } from './azure-ad.actions';
 import {Router} from '@angular/router';
-import {exhaustMap, map, catchError, withLatestFrom} from 'rxjs/operators';
+import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
 import {AuthAzureAdService} from './services/auth-azure-ad.service';
 import {of} from 'rxjs';
 import {AuthenticateByLogin, AuthenticateBySamlToken} from '../models/auth.models';
 import {Store} from '@ngrx/store';
 import {GrantType} from '../models/auth.grant-type.enum';
+import {ProviderType} from '../models/provider.enum';
 
 @Injectable()
 export class AzureAdEffects {
@@ -36,8 +37,9 @@ export class AzureAdEffects {
   @Effect()
   login$ = this.actions$.pipe(
     ofType(AuthActionTypes.Login),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
     map((action: Login) => action.payload),
-    exhaustMap((param: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken, keepLoggedIn: boolean }) =>
+    exhaustMap((param: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken, typeAuth: ProviderType, keepLoggedIn: boolean }) =>
       this.service.login(param.grantType, param.credentials).pipe(
         map(success => new AuthenticationSuccess(success)),
         catchError(error => of(new AuthenticationFailure(error)))
