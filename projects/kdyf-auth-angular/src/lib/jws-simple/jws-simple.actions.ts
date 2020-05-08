@@ -1,5 +1,6 @@
 import {Action} from '@ngrx/store';
 import {User, AuthenticateByLogin, AuthenticateResponse} from '../models/auth.models';
+import {ProviderType} from '../models/provider.enum';
 
 export enum AuthActionTypes {
   Login = '[Auth]Login',
@@ -16,7 +17,7 @@ export enum AuthActionTypes {
 export class Login implements Action {
   readonly type = AuthActionTypes.Login;
 
-  constructor(public payload: { credentials: AuthenticateByLogin }) {
+  constructor(public payload: { credentials: AuthenticateByLogin, typeAuth: ProviderType }) {
   }
 }
 

@@ -1,6 +1,7 @@
 import {Action} from '@ngrx/store';
 import {User, AuthenticateByLogin, AuthenticateByRefreshToken, AuthenticateResponse, AuthenticateBySamlToken} from '../models/auth.models';
 import {GrantType} from '../models/auth.grant-type.enum';
+import {ProviderType} from '../models/provider.enum';
 
 export enum AuthActionTypes {
   Login = '[Auth]Login',
@@ -22,7 +23,11 @@ export enum AuthActionTypes {
 export class Login implements Action {
   readonly type = AuthActionTypes.Login;
 
-  constructor(public payload: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken }) {
+  constructor(public payload: {
+    grantType: GrantType,
+    credentials: AuthenticateByLogin | AuthenticateBySamlToken,
+    typeAuth: ProviderType
+  }) {
   }
 }
 

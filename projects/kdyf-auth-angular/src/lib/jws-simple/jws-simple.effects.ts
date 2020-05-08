@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {Injectable} from '@angular/core';
 // RXJS
 import {of} from 'rxjs';
-import {exhaustMap, map, catchError, withLatestFrom} from 'rxjs/operators';
+import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
 // NGRX
 import {Store} from '@ngrx/store';
 import * as authActions from './jws-simple.actions';
@@ -11,6 +11,7 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 // Services
 import {JwsSimpleService} from './services/jws-simple.service';
 import {AuthenticateByLogin} from '../models/auth.models';
+import {ProviderType} from '../models/provider.enum';
 
 @Injectable()
 export class JwsSimpleEffects {
@@ -30,6 +31,7 @@ export class JwsSimpleEffects {
   @Effect()
   login$ = this.actions$.pipe(
     ofType(authActions.AuthActionTypes.Login),
+    filter((action: any) => action.payload.typeAuth === ProviderType.JwsSimple),
     map((action: authActions.Login) => action.payload),
     exhaustMap((param: { credentials: AuthenticateByLogin }) =>
       this.service.login(param.credentials).pipe(

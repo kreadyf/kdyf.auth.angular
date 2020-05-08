@@ -11,12 +11,13 @@ import {
   SamlInitLogin
 } from './eikon.actions';
 import {Router} from '@angular/router';
-import {exhaustMap, map, catchError, withLatestFrom} from 'rxjs/operators';
+import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
 import {EikonService} from './services/eikon.service';
 import {of} from 'rxjs';
 import {AuthenticateByLogin, AuthenticateBySamlToken} from '../models/auth.models';
 import {Store} from '@ngrx/store';
 import {GrantType} from '../models/auth.grant-type.enum';
+import {ProviderType} from '../models/provider.enum';
 
 @Injectable()
 export class EikonEffects {
@@ -38,6 +39,7 @@ export class EikonEffects {
   @Effect()
   login$ = this.actions$.pipe(
     ofType(AuthActionTypes.Login),
+    filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
     map((action: Login) => action.payload),
     exhaustMap((param: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken }) =>
       this.service.login(param.grantType, param.credentials).pipe(
