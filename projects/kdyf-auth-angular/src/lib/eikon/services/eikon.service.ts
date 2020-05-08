@@ -39,7 +39,9 @@ export class CustomQueryEncoderHelper implements HttpParameterCodec {
 export class EikonService {
 
 
-  constructor(private http: HttpClient, private configService: EikonConfigService, private store: Store<any>) {
+  constructor(private http: HttpClient,
+              private configService: EikonConfigService,
+              private store: Store<any>) {
 
   }
 
