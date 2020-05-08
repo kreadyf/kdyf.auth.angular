@@ -10,7 +10,7 @@ export interface User {
 export interface AuthenticateByLogin {
   username: string;
   password: string;
-  tenant: string;
+  tenant?: string;
 }
 
 export interface AuthenticateBySamlToken {
