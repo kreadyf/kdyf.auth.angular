@@ -5,11 +5,11 @@ import {CanActivate} from '@angular/router';
 import {Observable} from 'rxjs';
 import {map, take} from 'rxjs/operators';
 // NGRX
-import * as authActions from '../jws-simple.actions';
 import {Store, select} from '@ngrx/store';
+import * as authActions from '../../auth.actions';
 
 @Injectable()
-export class JwsSimpleGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
 
   constructor(private store: Store<any>) {
   }
@@ -19,7 +19,7 @@ export class JwsSimpleGuard implements CanActivate {
       select((s: any) => s.auth.user),
       map(user => {
         if (!user) {
-          this.store.dispatch(new authActions.LoginRedirect());
+          this.store.dispatch(new authActions.LoginRedirect({urlRedirect: undefined}));
           return false;
         }
         return true;

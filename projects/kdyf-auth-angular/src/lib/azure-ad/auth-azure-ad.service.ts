@@ -8,16 +8,16 @@ import {Observable, forkJoin, of, throwError} from 'rxjs';
 import {Store} from '@ngrx/store';
 // Others
 import {
+  User,
   AuthenticateResponse,
   AuthenticateByLogin,
-  User,
-  AuthenticateByRefreshToken,
   AuthenticateBySamlToken,
+  AuthenticateByRefreshToken,
   AuthenticateByAzureAdToken
-} from '../../models/auth.models';
+} from '../shared/models/auth.models';
 import {JwtHelperService} from '@auth0/angular-jwt';
-import {GrantType} from '../../models/auth.grant-type.enum';
-import {Configuration} from '../../models/configuration.model';
+import {GrantType} from '../shared/models/auth.grant-type.enum';
+import {Configuration} from '../shared/models/configuration.model';
 
 const jwtHelper = new JwtHelperService();
 const FORM_ENCODED_HTTP_HEADERS: HttpHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
@@ -56,7 +56,8 @@ export class AuthAzureAdService {
     document.location.href = `${this.config.authConfig.urlCode}response_type=${this.config.authConfig.response_type}&state=${this.config.authConfig.state}&client_id=${this.config.authConfig.azureAdClientId}&redirect_uri=${this.config.authConfig.azureAdRedirectUri}&scope=${this.config.authConfig.scope}&prompt=select_account`;
   }
 
-  login(grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken | AuthenticateByAzureAdToken): Observable<{ user: User, authenticate: AuthenticateResponse }> {
+  login(grantType: GrantType,
+        credentials: AuthenticateByLogin | AuthenticateBySamlToken | AuthenticateByAzureAdToken): Observable<{ user: User, authenticate: AuthenticateResponse }> {
 
     let body = new HttpParams({encoder: new CustomQueryEncoderHelper()});
     const loginHost = `${this.config.authConfig.loginHost}/connect/token`;

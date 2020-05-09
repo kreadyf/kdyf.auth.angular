@@ -1,29 +1,24 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {EikonConfigService} from './services/eikon-config.service';
-import {
-  AuthActionTypes,
-  AuthenticationFailure,
-  Login,
-  AuthenticationSuccess,
-  LoginRedirect,
-  RefreshToken,
-  SamlInitLogin
-} from './eikon.actions';
+// Angular
 import {Router} from '@angular/router';
-import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
-import {EikonService} from './services/eikon.service';
+import {Injectable} from '@angular/core';
+// RXJS
 import {of} from 'rxjs';
-import {AuthenticateByLogin, AuthenticateBySamlToken} from '../models/auth.models';
+import {catchError, exhaustMap, filter, map, withLatestFrom} from 'rxjs/operators';
+// NGRX
 import {Store} from '@ngrx/store';
-import {GrantType} from '../models/auth.grant-type.enum';
-import {ProviderType} from '../models/provider.enum';
+import * as authActions from '../auth.actions';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+// services
+import {EikonService} from './eikon.service';
+// Others
+import {ProviderType} from '../shared/models/provider.enum';
+import {GrantType} from '../shared/models/auth.grant-type.enum';
+import {AuthenticateByLogin, AuthenticateBySamlToken} from '../shared/models/auth.models';
 
 @Injectable()
 export class EikonEffects {
 
   constructor(private actions$: Actions,
-              private config: EikonConfigService,
               private service: EikonService,
               private router: Router,
               private store: Store<any>) {
@@ -32,49 +27,56 @@ export class EikonEffects {
 
   @Effect()
   logout$ = this.actions$.pipe(
-    ofType(AuthActionTypes.Logout, AuthActionTypes.AuthenticationFailure),
-    map(param => new LoginRedirect())
+    ofType(authActions.AuthActionTypes.Logout, authActions.AuthActionTypes.AuthenticationFailure),
+    filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
+    map(param => new authActions.LoginRedirect({
+      urlRedirect: null,
+      typeAuth: ProviderType.Eikon
+    }))
   );
 
   @Effect()
   login$ = this.actions$.pipe(
-    ofType(AuthActionTypes.Login),
+    ofType(authActions.AuthActionTypes.Login),
     filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
-    map((action: Login) => action.payload),
+    map((action: authActions.Login) => action.payload),
     exhaustMap((param: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken }) =>
       this.service.login(param.grantType, param.credentials).pipe(
-        map(success => new AuthenticationSuccess(success)),
-        catchError(error => of(new AuthenticationFailure(error)))
+        map(success => new authActions.AuthenticationSuccess(success)),
+        catchError(error => of(new authActions.AuthenticationFailure(error)))
       )
     )
   );
 
   @Effect()
   requestAuthenticationFailure$ = this.actions$.pipe(
-    ofType(AuthActionTypes.RequestAuthenticationFailure),
+    ofType(authActions.AuthActionTypes.RequestAuthenticationFailure),
+    filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
     withLatestFrom(this.store),
     map(([action, storeState]) =>
       storeState.auth.authenticate && storeState.auth.authenticate.refreshToken
-        ? new RefreshToken({refreshToken: storeState.auth.authenticate.refreshToken})
-        : new AuthenticationFailure('no-refresh-token')
+        ? new authActions.RefreshToken({refreshToken: storeState.auth.authenticate.refreshToken})
+        : new authActions.AuthenticationFailure({validation: 'no-refresh-token', typeAuth: ProviderType.Eikon})
     )
   );
 
   @Effect()
   refreshToken$ = this.actions$.pipe(
-    ofType(AuthActionTypes.RefreshToken),
-    exhaustMap((action: RefreshToken) =>
-      this.service.refreshToken({refreshToken: action.payload.refreshToken}).pipe(
-        map(success => new AuthenticationSuccess(success)),
-        catchError(error => of(new AuthenticationFailure(error)))
+    ofType(authActions.AuthActionTypes.RefreshToken),
+    filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
+    exhaustMap((action: authActions.RefreshToken) =>
+      this.service.refreshToken(action.payload.refreshToken).pipe(
+        map(success => new authActions.AuthenticationSuccess(success)),
+        catchError(error => of(new authActions.AuthenticationFailure(error)))
       )
     )
   );
 
   @Effect({dispatch: false})
   samlInitLogin$ = this.actions$.pipe(
-    ofType(AuthActionTypes.SamlInitLogin),
-    exhaustMap((action: SamlInitLogin) =>
+    ofType(authActions.AuthActionTypes.SamlInitLogin),
+    filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
+    exhaustMap((action: authActions.AuthActionTypes.SamlInitLogin) =>
       of(this.service.initSaml())
     )
   );

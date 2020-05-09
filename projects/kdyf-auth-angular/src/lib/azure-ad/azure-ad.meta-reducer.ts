@@ -1,6 +1,7 @@
+// NGRX
+import {AuthState} from './azure-ad.reducer';
 import {ActionReducer, MetaReducer} from '@ngrx/store';
 import {localStorageSync} from 'ngrx-store-localstorage';
-import {AuthState} from './azure-ad.reducer';
 
 export function sessionStorageSyncReducer(reducer: ActionReducer<AuthState>): ActionReducer<AuthState> {
 

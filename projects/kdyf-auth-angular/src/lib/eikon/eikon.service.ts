@@ -1,18 +1,23 @@
-import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
+// Angular
+import {Inject, Injectable} from '@angular/core';
+import {HttpClient, HttpParams, HttpHeaders, HttpParameterCodec} from '@angular/common/http';
+// RXJS
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {HttpClient, HttpParams, HttpHeaders, HttpParameterCodec} from '@angular/common/http';
-import {EikonConfigService} from './eikon-config.service';
-import {
-  AuthenticateResponse,
-  AuthenticateByLogin,
-  User,
-  AuthenticateByRefreshToken,
-  AuthenticateBySamlToken
-} from '../../models/auth.models';
+// NGRX
+import {Store} from '@ngrx/store';
+// Modules
 import {JwtHelperService} from '@auth0/angular-jwt';
-import {GrantType} from '../../models/auth.grant-type.enum';
+// Others
+import {
+  User,
+  AuthenticateByLogin,
+  AuthenticateResponse,
+  AuthenticateBySamlToken,
+  AuthenticateByRefreshToken
+} from '../shared/models/auth.models';
+import {GrantType} from '../shared/models/auth.grant-type.enum';
+import {Configuration} from '../shared/models/configuration.model';
 
 const jwtHelper = new JwtHelperService();
 const FORM_ENCODED_HTTP_HEADERS: HttpHeaders = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
@@ -40,18 +45,18 @@ export class EikonService {
 
 
   constructor(private http: HttpClient,
-              private configService: EikonConfigService,
-              private store: Store<any>) {
+              private store: Store<any>,
+              @Inject('authConfig') private config: Configuration) {
 
   }
 
   initSaml(): void {
-    var config = this.configService.Get();
+    const config = this.config.authConfig;
     document.location.href = `${config.loginHost}${config.samlInitUrl}`;
   }
 
   login(grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken): Observable<{ user: User, authenticate: AuthenticateResponse }> {
-    var config = this.configService.Get();
+    const config = this.config.authConfig;
 
     let body = new HttpParams({encoder: new CustomQueryEncoderHelper()})
       .set('client_id', config.clientId)
@@ -83,7 +88,7 @@ export class EikonService {
       return Observable.throw({user: null, authenticate: null});
     }
 
-    var config = this.configService.Get();
+    const config = this.config.authConfig;
 
     const body = new HttpParams()
       .set('client_id', config.clientId)
@@ -101,7 +106,7 @@ export class EikonService {
   }
 
   parseToken(token: string): User {
-    var obj = jwtHelper.decodeToken(token);
+    const obj = jwtHelper.decodeToken(token);
     return {username: obj.sub, tenant: obj.tenant, displayName: obj.name, roles: obj.role};
   }
 
