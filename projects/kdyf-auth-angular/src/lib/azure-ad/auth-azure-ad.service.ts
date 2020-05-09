@@ -1,21 +1,23 @@
 // Angular
-import {Injectable, Inject} from '@angular/core';
-import {HttpClient, HttpParams, HttpHeaders, HttpParameterCodec} from '@angular/common/http';
+import {Inject, Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders, HttpParameterCodec, HttpParams} from '@angular/common/http';
 // RXJS
-import {map, catchError} from 'rxjs/operators';
-import {Observable, forkJoin, of, throwError} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
+import {Observable, of, throwError} from 'rxjs';
 // NGRX
 import {Store} from '@ngrx/store';
+// Modules
+import {JwtHelperService} from '@auth0/angular-jwt';
 // Others
 import {
-  User,
-  AuthenticateResponse,
+  AuthenticateByAzureAdToken,
   AuthenticateByLogin,
-  AuthenticateBySamlToken,
   AuthenticateByRefreshToken,
-  AuthenticateByAzureAdToken
+  AuthenticateBySamlToken,
+  AuthenticateResponse,
+  User
 } from '../shared/models/auth.models';
-import {JwtHelperService} from '@auth0/angular-jwt';
+import {ProviderType} from '../shared/models/provider.enum';
 import {GrantType} from '../shared/models/auth.grant-type.enum';
 import {Configuration} from '../shared/models/configuration.model';
 
@@ -43,9 +45,15 @@ export class CustomQueryEncoderHelper implements HttpParameterCodec {
 @Injectable()
 export class AuthAzureAdService {
 
+  config: Configuration;
+
   constructor(private http: HttpClient,
               private store: Store<any>,
-              @Inject('authConfig') private config: Configuration) {
+              @Inject('authConfig') private configuration: Configuration[]) {
+
+    const index = this.configuration.findIndex((item: Configuration) => item.providerType === ProviderType.AzureAd);
+    this.config = this.configuration[index];
+
   }
 
   initSaml(): void {

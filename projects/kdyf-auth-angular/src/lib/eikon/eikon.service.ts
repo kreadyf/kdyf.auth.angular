@@ -16,6 +16,7 @@ import {
   AuthenticateBySamlToken,
   AuthenticateByRefreshToken
 } from '../shared/models/auth.models';
+import {ProviderType} from '../shared/models/provider.enum';
 import {GrantType} from '../shared/models/auth.grant-type.enum';
 import {Configuration} from '../shared/models/configuration.model';
 
@@ -43,10 +44,14 @@ export class CustomQueryEncoderHelper implements HttpParameterCodec {
 @Injectable()
 export class EikonService {
 
+  config: Configuration;
 
   constructor(private http: HttpClient,
               private store: Store<any>,
-              @Inject('authConfig') private config: Configuration) {
+              @Inject('authConfig') private configuration: Configuration[]) {
+
+    const index = this.configuration.findIndex((item: Configuration) => item.providerType === ProviderType.Eikon);
+    this.config = this.configuration[index];
 
   }
 

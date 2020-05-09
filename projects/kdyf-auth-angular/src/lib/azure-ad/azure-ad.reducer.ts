@@ -86,7 +86,7 @@ export function reducer(state: AuthState = initialState, action: AuthActions): A
 
       return {
         ...state,
-        error: action.payload,
+        error: action.payload.validation,
         pending: false,
         user: undefined,
         authenticate: undefined
@@ -119,7 +119,7 @@ export function reducer(state: AuthState = initialState, action: AuthActions): A
         ...state,
         pending: false,
         initializing: false,
-        error: action.payload.error
+        error: action.payload.validation
       };
     }
 
