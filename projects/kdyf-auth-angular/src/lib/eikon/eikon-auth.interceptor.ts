@@ -1,16 +1,20 @@
 // Angular
 import {Injectable} from '@angular/core';
-import {HttpInterceptor, HttpErrorResponse, HttpResponse, HttpRequest, HttpHandler, HttpEvent} from '@angular/common/http';
+import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse} from '@angular/common/http';
 // RXJS
-import {throwError, Observable} from 'rxjs';
-import {tap, catchError, withLatestFrom, exhaustMap} from 'rxjs/operators';
+import {BehaviorSubject, Observable, throwError} from 'rxjs';
+import {catchError, exhaustMap, finalize, tap, withLatestFrom} from 'rxjs/operators';
 // NGRX
 import {ofType} from '@ngrx/effects';
-import * as authActions from '../jws-simple.actions';
-import {Store, ActionsSubject, Action} from '@ngrx/store';
+import * as authActions from '../auth.actions';
+import {ActionsSubject, Store} from '@ngrx/store';
+import {ProviderType} from '../shared/models/provider.enum';
 
 @Injectable()
-export class JwsSimpleAuthInterceptor implements HttpInterceptor {
+export class EikonAuthInterceptor implements HttpInterceptor {
+
+  isRefreshingToken = false;
+  tokenSubject: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
   authToken: string;
 
@@ -41,21 +45,24 @@ export class JwsSimpleAuthInterceptor implements HttpInterceptor {
   }
 
   handle401Error(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    this.store.dispatch(new authActions.RequestAuthenticationFailure());
+    if (!this.isRefreshingToken) {
+      this.isRefreshingToken = true;
+      this.store.dispatch(new authActions.RequestAuthenticationFailure({typeAuth: ProviderType.Eikon}));
+    }
 
     return this.actions.pipe(
       ofType(authActions.AuthActionTypes.AuthenticationSuccess, authActions.AuthActionTypes.AuthenticationFailure),
       withLatestFrom(this.store),
-      exhaustMap(([action, storeState]) => {
+      exhaustMap(([action, storeState]: any) => {
 
-        // ???
-        let act: Action = <Action> action;
-
-        if (act.type == authActions.AuthActionTypes.AuthenticationSuccess) {
+        if (action.type === authActions.AuthActionTypes.AuthenticationSuccess) {
           return next.handle(this.addToken(req, storeState.auth.authenticate.authToken));
         } else {
           return throwError(new HttpResponse({status: 401})); // check
         }
+      }),
+      finalize(() => {
+        this.isRefreshingToken = false;
       }));
   }
 

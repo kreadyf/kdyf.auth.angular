@@ -1,22 +1,19 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {
-  AuthActionTypes,
-  AuthenticationFailure,
-  Login,
-  AuthenticationSuccess,
-  LoginRedirect,
-  RefreshToken,
-  SamlInitLogin, AzureAdInitLogin, Authorize, AuthorizationSuccess, AuthorizationFailure
-} from './azure-ad.actions';
+// Angular
 import {Router} from '@angular/router';
-import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
-import {AuthAzureAdService} from './services/auth-azure-ad.service';
+import {Injectable} from '@angular/core';
+// RXJS
 import {of} from 'rxjs';
-import {AuthenticateByLogin, AuthenticateBySamlToken} from '../models/auth.models';
+import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
+// NGRX
 import {Store} from '@ngrx/store';
-import {GrantType} from '../models/auth.grant-type.enum';
-import {ProviderType} from '../models/provider.enum';
+import * as authActions from '../auth.actions';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+// Services
+import {AuthAzureAdService} from './auth-azure-ad.service';
+// Others
+import {ProviderType} from '../shared/models/provider.enum';
+import {GrantType} from '../shared/models/auth.grant-type.enum';
+import {AuthenticateByLogin, AuthenticateBySamlToken} from '../shared/models/auth.models';
 
 @Injectable()
 export class AzureAdEffects {
@@ -29,77 +26,117 @@ export class AzureAdEffects {
 
   @Effect()
   logout$ = this.actions$.pipe(
-    ofType(AuthActionTypes.Logout, AuthActionTypes.AuthenticationFailure, AuthActionTypes.AuthorizationFailure),
+    ofType(authActions.AuthActionTypes.Logout,
+      authActions.AuthActionTypes.AuthenticationFailure,
+      authActions.AuthActionTypes.AuthorizationFailure),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
     withLatestFrom(this.store),
-    map(([action, storeState]) => new LoginRedirect({urlRedirect: this.router.url !== '/eikon/login' ? this.router.url : storeState.auth.urlRedirect}))
+    map(([action, storeState]) => new authActions.LoginRedirect({
+      urlRedirect: this.router.url !== '/eikon/login' ? this.router.url : storeState.auth.urlRedirect,
+      typeAuth: ProviderType.AzureAd
+    }))
   );
 
   @Effect()
   login$ = this.actions$.pipe(
-    ofType(AuthActionTypes.Login),
+    ofType(authActions.AuthActionTypes.Login),
     filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
-    map((action: Login) => action.payload),
-    exhaustMap((param: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken, typeAuth: ProviderType, keepLoggedIn: boolean }) =>
-      this.service.login(param.grantType, param.credentials).pipe(
-        map(success => new AuthenticationSuccess(success)),
-        catchError(error => of(new AuthenticationFailure(error)))
-      )
+    map((action: authActions.Login) => action.payload),
+    exhaustMap((param: {
+        grantType: GrantType,
+        credentials: AuthenticateByLogin | AuthenticateBySamlToken,
+        typeAuth: ProviderType,
+        keepLoggedIn: boolean
+      }) =>
+        this.service.login(param.grantType, param.credentials).pipe(
+          map(success => new authActions.AuthenticationSuccess({
+            user: success.user,
+            authenticate: success.authenticate,
+            typeAuth: ProviderType.AzureAd
+          })),
+          catchError(error => of(new authActions.AuthenticationFailure({
+            validation: error, typeAuth: ProviderType.AzureAd
+          })))
+        )
     )
   );
 
   @Effect()
   requestAuthenticationFailure$ = this.actions$.pipe(
-    ofType(AuthActionTypes.RequestAuthenticationFailure),
+    ofType(authActions.AuthActionTypes.RequestAuthenticationFailure),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
     withLatestFrom(this.store),
     map(([action, storeState]) =>
       localStorage.getItem('authenticate') && (JSON.parse(localStorage.getItem('authenticate'))).refreshToken
-        ? new RefreshToken({refreshToken: (JSON.parse(localStorage.getItem('authenticate'))).refreshToken})
-        : new AuthenticationFailure('no-refresh-token')
+        ? new authActions.RefreshToken({
+          refreshToken: (JSON.parse(localStorage.getItem('authenticate'))).refreshToken,
+          typeAuth: ProviderType.AzureAd
+        })
+        : new authActions.AuthenticationFailure({validation: 'no-refresh-token', typeAuth: ProviderType.AzureAd})
     )
   );
 
   @Effect()
   authenticationSuccess$ = this.actions$.pipe(
-    ofType(AuthActionTypes.AuthenticationSuccess),
-    map((action: AuthenticationSuccess) => new Authorize(action.payload.authenticate.authToken))
+    ofType(authActions.AuthActionTypes.AuthenticationSuccess),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
+    map((action: authActions.AuthenticationSuccess) => new authActions.Authorize({
+      authToken: action.payload.authenticate.authToken,
+      typeAuth: ProviderType.AzureAd
+    }))
   );
 
   @Effect()
   authorize$ = this.actions$.pipe(
-    ofType(AuthActionTypes.Authorize),
-    exhaustMap((action: Authorize) => {
+    ofType(authActions.AuthActionTypes.Authorize),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
+    exhaustMap((action: any) => {
         return action.authToken
           ? this.service.checkAndUpdateAuthorization().pipe(
-            map(policies => new AuthorizationSuccess({policies: policies})),
-            catchError(error => of(new AuthorizationFailure({error: error}))))
-          : of(new AuthorizationSuccess({policies: []}));
+            map(policies => new authActions.AuthorizationSuccess({
+              policies: policies, typeAuth: ProviderType.AzureAd
+            })),
+            catchError(error => of(new authActions.AuthorizationFailure({
+              validation: error, typeAuth: ProviderType.AzureAd
+            }))))
+          : of(new authActions.AuthorizationSuccess({policies: []}));
       }
     )
   );
 
   @Effect()
   refreshToken$ = this.actions$.pipe(
-    ofType(AuthActionTypes.RefreshToken),
-    exhaustMap((action: RefreshToken) =>
-      this.service.refreshToken({refreshToken: action.payload.refreshToken}).pipe(
-        map(success => new AuthenticationSuccess(success)),
-        catchError(error => of(new AuthenticationFailure(error)))
+    ofType(authActions.AuthActionTypes.RefreshToken),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
+    exhaustMap((action: authActions.RefreshToken) =>
+      this.service.refreshToken(action.payload.refreshToken).pipe(
+        map((success: any) => new authActions.AuthenticationSuccess({
+          user: success.user,
+          authenticate: success.authenticate,
+          typeAuth: ProviderType.AzureAd
+        })),
+        catchError(error => of(new authActions.AuthenticationFailure({
+          validation: error,
+          typeAuth: ProviderType.AzureAd
+        })))
       )
     )
   );
 
   @Effect({dispatch: false})
   samlInitLogin$ = this.actions$.pipe(
-    ofType(AuthActionTypes.SamlInitLogin),
-    exhaustMap((action: SamlInitLogin) =>
+    ofType(authActions.AuthActionTypes.SamlInitLogin),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
+    exhaustMap((action: authActions.SamlInitLogin) =>
       of(this.service.initSaml())
     )
   );
 
   @Effect({dispatch: false})
   azureAdInitLogin$ = this.actions$.pipe(
-    ofType(AuthActionTypes.AzureAdInitLogin),
-    exhaustMap((action: AzureAdInitLogin) =>
+    ofType(authActions.AuthActionTypes.AzureAdInitLogin),
+    filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
+    exhaustMap((action: authActions.AuthActionTypes.AzureAdInitLogin) =>
       of(this.service.initAzureAd())
     )
   );

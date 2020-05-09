@@ -1,5 +1,7 @@
+// NGRX
+import {AuthActions, AuthActionTypes} from './eikon.actions';
+// Others
 import {User, AuthenticateResponse} from './models/auth.models';
-import {EikonActions, AuthActionTypes} from './eikon.actions';
 
 export interface AuthState {
   user: User | undefined;
@@ -16,7 +18,7 @@ export const initialState: AuthState = {
   error: undefined
 };
 
-export function reducer(state: AuthState = initialState, action: EikonActions): AuthState {
+export function reducer(state: AuthState = initialState, action: AuthActions): AuthState {
 
   switch (action.type) {
     case AuthActionTypes.Login: {
@@ -68,4 +70,5 @@ export function reducer(state: AuthState = initialState, action: EikonActions): 
     default:
       return state;
   }
+
 }

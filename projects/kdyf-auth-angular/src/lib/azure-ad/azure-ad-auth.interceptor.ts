@@ -1,17 +1,17 @@
 // Angular
 import {Injectable} from '@angular/core';
-import {HttpRequest, HttpEvent, HttpHandler} from '@angular/common/http';
-import {HttpInterceptor, HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse} from '@angular/common/http';
 // RXJS
 import {BehaviorSubject, Observable, throwError, timer} from 'rxjs';
-import {catchError, finalize, withLatestFrom, exhaustMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, exhaustMap, finalize, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 // NGRX
 import {ofType} from '@ngrx/effects';
-import {Store, ActionsSubject} from '@ngrx/store';
-import * as auth_actions from '../azure-ad.actions';
-import {RequestAuthenticationFailure, AuthActionTypes} from '../azure-ad.actions';
+import * as authActions from '../auth.actions';
+import {ActionsSubject, Store} from '@ngrx/store';
 // Services
 import {AuthAzureAdService} from './auth-azure-ad.service';
+// Others
+import {ProviderType} from '../shared/models/provider.enum';
 
 @Injectable()
 export class AzureAdAuthInterceptor implements HttpInterceptor {
@@ -28,7 +28,7 @@ export class AzureAdAuthInterceptor implements HttpInterceptor {
       tap(s => {
         const token = localStorage.getItem('authenticate') ?
           JSON.parse(localStorage.getItem('authenticate')).authToken : undefined;
-        token ? this.store.dispatch(new auth_actions.Authorize(token)) : '';
+        token ? this.store.dispatch(new authActions.Authorize(token)) : '';
       })
     ).subscribe();
 
@@ -39,7 +39,7 @@ export class AzureAdAuthInterceptor implements HttpInterceptor {
 
     return next.handle(this.addToken(req)).pipe(
       catchError(error => {
-        if (error instanceof HttpErrorResponse && (<HttpErrorResponse> error).status == 401) {
+        if (error instanceof HttpErrorResponse && (<HttpErrorResponse> error).status === 401) {
           return this.handle401Error(req, next);
         } else {
           return throwError(error); // check
@@ -62,15 +62,15 @@ export class AzureAdAuthInterceptor implements HttpInterceptor {
   handle401Error(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (!this.isRefreshingToken) {
       this.isRefreshingToken = true;
-      this.store.dispatch(new RequestAuthenticationFailure());
+      this.store.dispatch(new authActions.RequestAuthenticationFailure({typeAuth: ProviderType.AzureAd}));
     }
 
     return this.actions.pipe(
-      ofType(AuthActionTypes.AuthenticationSuccess, AuthActionTypes.AuthenticationFailure),
+      ofType(authActions.AuthActionTypes.AuthenticationSuccess, authActions.AuthActionTypes.AuthenticationFailure),
       withLatestFrom(this.store),
       exhaustMap(([action, storeState]) => {
 
-        if ((<any> action).type == AuthActionTypes.AuthenticationSuccess) {
+        if ((<any> action).type === authActions.AuthActionTypes.AuthenticationSuccess) {
           return next.handle(this.addToken(req));
         } else {
           return throwError(new HttpResponse({status: 401})); // check

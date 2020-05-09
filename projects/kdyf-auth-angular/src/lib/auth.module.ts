@@ -13,20 +13,17 @@ import {JwsSimpleEffects} from './jws-simple/jws-simple.effects';
 import {reducer} from './jws-simple/jws-simple.reducer';
 import {metaReducers} from './jws-simple/jws-simple.meta-reducer';
 // Services
-import {EikonService} from './eikon/services/eikon.service';
-import {JwsSimpleService} from './jws-simple/services/jws-simple.service';
-import {AuthAzureAdService} from './azure-ad/services/auth-azure-ad.service';
+import {EikonService} from './eikon/eikon.service';
+import {JwsSimpleService} from './jws-simple/jws-simple.service';
+import {AuthAzureAdService} from './azure-ad/auth-azure-ad.service';
 // Interceptors
-import {EikonAuthInterceptor} from './eikon/services/eikon-auth.interceptor';
-import {AzureAdAuthInterceptor} from './azure-ad/services/azure-ad-auth.interceptor';
-import {JwsSimpleAuthInterceptor} from './jws-simple/services/jws-simple-auth.interceptor';
+import {EikonAuthInterceptor} from './eikon/eikon-auth.interceptor';
+import {AzureAdAuthInterceptor} from './azure-ad/azure-ad-auth.interceptor';
+import {JwsSimpleAuthInterceptor} from './jws-simple/jws-simple-auth.interceptor';
 // Guards
-import {EikonGuard} from './eikon/services/eikon.guard';
-import {JwsSimpleGuard} from './jws-simple/services/jws-simple.guard';
-import {AuthAzureAdGuard} from './azure-ad/services/auth-azure-ad.guard';
+import {AuthGuard} from './shared/services/auth.guard';
 // Others
-import {Configuration} from './models/configuration.model';
-import {EikonConfigService} from './eikon/services/eikon-config.service';
+import {Configuration} from './shared/models/configuration.model';
 
 @NgModule({
   imports: [
@@ -42,15 +39,11 @@ export class AuthModule {
     return {
       ngModule: RootAuthModule,
       providers: [
-        AuthAzureAdGuard,
-        EikonGuard,
-        JwsSimpleGuard,
+        AuthGuard,
 
         AuthAzureAdService,
         EikonService,
         JwsSimpleService,
-
-        EikonConfigService,
 
         {
           provide: HTTP_INTERCEPTORS,

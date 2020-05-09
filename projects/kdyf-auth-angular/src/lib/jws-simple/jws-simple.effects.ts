@@ -3,15 +3,16 @@ import {Router} from '@angular/router';
 import {Injectable} from '@angular/core';
 // RXJS
 import {of} from 'rxjs';
-import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
+import {catchError, exhaustMap, filter, map, withLatestFrom} from 'rxjs/operators';
 // NGRX
 import {Store} from '@ngrx/store';
-import * as authActions from './jws-simple.actions';
+import * as authActions from '../auth.actions';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 // Services
-import {JwsSimpleService} from './services/jws-simple.service';
-import {AuthenticateByLogin} from '../models/auth.models';
-import {ProviderType} from '../models/provider.enum';
+import {JwsSimpleService} from './jws-simple.service';
+// Others
+import {ProviderType} from '../shared/models/provider.enum';
+import {AuthenticateByLogin} from '../shared/models/auth.models';
 
 @Injectable()
 export class JwsSimpleEffects {
@@ -25,7 +26,8 @@ export class JwsSimpleEffects {
   @Effect()
   logout$ = this.actions$.pipe(
     ofType(authActions.AuthActionTypes.Logout, authActions.AuthActionTypes.AuthenticationFailure),
-    map(param => new authActions.LoginRedirect())
+    filter((action: any) => action.payload.typeAuth === ProviderType.JwsSimple),
+    map(param => new authActions.LoginRedirect({urlRedirect: null, typeAuth: ProviderType.JwsSimple}))
   );
 
   @Effect()
@@ -44,9 +46,10 @@ export class JwsSimpleEffects {
   @Effect()
   requestAuthenticationFailure$ = this.actions$.pipe(
     ofType(authActions.AuthActionTypes.RequestAuthenticationFailure),
+    filter((action: any) => action.payload.typeAuth === ProviderType.JwsSimple),
     withLatestFrom(this.store),
     map(([action, storeState]) =>
-      new authActions.AuthenticationFailure('temp')
+      new authActions.AuthenticationFailure({validation: 'temp', typeAuth: ProviderType.JwsSimple})
     )
   );
 

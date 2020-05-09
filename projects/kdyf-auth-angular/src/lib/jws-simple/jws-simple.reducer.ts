@@ -1,5 +1,7 @@
-import {User, AuthenticateResponse} from '../models/auth.models';
-import {JwsSimpleActions, AuthActionTypes} from './jws-simple.actions';
+// NGRX
+import {AuthActions, AuthActionTypes} from '../auth.actions';
+// Others
+import {User, AuthenticateResponse} from '../shared/models/auth.models';
 
 export interface AuthState {
   user: User | undefined;
@@ -16,7 +18,7 @@ export const initialState: AuthState = {
   error: undefined
 };
 
-export function reducer(state: AuthState = initialState, action: JwsSimpleActions): AuthState {
+export function reducer(state: AuthState = initialState, action: AuthActions): AuthState {
 
   switch (action.type) {
     case AuthActionTypes.Login: {
@@ -40,7 +42,7 @@ export function reducer(state: AuthState = initialState, action: JwsSimpleAction
     case AuthActionTypes.AuthenticationFailure: {
       return {
         ...state,
-        error: action.payload,
+        error: action.payload.validation,
         pending: false,
         user: undefined,
         authenticate: undefined

@@ -1,5 +1,7 @@
-import {User, AuthenticateResponse} from '../models/auth.models';
-import {AzureAdActions, AuthActionTypes} from './azure-ad.actions';
+// NGRX
+import {AuthActions, AuthActionTypes} from '../auth.actions';
+// Others
+import {User, AuthenticateResponse} from '../shared/models/auth.models';
 
 export interface AuthState {
   user: User | undefined;
@@ -24,7 +26,8 @@ export const initialState: AuthState = {
   urlRedirect: undefined
 };
 
-export function reducer(state: AuthState = initialState, action: AzureAdActions): AuthState {
+export function reducer(state: AuthState = initialState, action: AuthActions): AuthState {
+
   switch (action.type) {
     case AuthActionTypes.Login: {
       return {
@@ -145,4 +148,5 @@ export function reducer(state: AuthState = initialState, action: AzureAdActions)
     default:
       return state;
   }
+
 }

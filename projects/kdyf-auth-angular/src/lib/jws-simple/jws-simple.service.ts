@@ -9,8 +9,8 @@ import {Store} from '@ngrx/store';
 // Modules
 import {JwtHelperService} from '@auth0/angular-jwt';
 // Others
-import {AuthenticateResponse, AuthenticateByLogin, User} from '../../models/auth.models';
-import {Configuration} from '../../models/configuration.model';
+import {Configuration} from '../shared/models/configuration.model';
+import {AuthenticateResponse, AuthenticateByLogin, User} from '../shared/models/auth.models';
 
 const jwtHelper = new JwtHelperService();
 

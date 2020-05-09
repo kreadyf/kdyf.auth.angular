@@ -1,7 +1,7 @@
 // NGRX
+import {AuthState} from './jws-simple.reducer';
 import {ActionReducer, MetaReducer} from '@ngrx/store';
 import {localStorageSync} from 'ngrx-store-localstorage';
-import {AuthState} from './jws-simple.reducer';
 
 export function localStorageSyncReducer(reducer: ActionReducer<AuthState>): ActionReducer<AuthState> {
   return localStorageSync({
