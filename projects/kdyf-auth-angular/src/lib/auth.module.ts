@@ -35,7 +35,7 @@ import {Configuration} from './shared/models/configuration.model';
 })
 
 export class AuthModule {
-  static forRoot(config: Configuration): ModuleWithProviders {
+  static forRoot(config: Configuration[]): ModuleWithProviders {
     return {
       ngModule: RootAuthModule,
       providers: [
@@ -63,7 +63,7 @@ export class AuthModule {
 
         {
           provide: 'authConfig', useValue: config
-        },
+        }
       ]
     };
   }

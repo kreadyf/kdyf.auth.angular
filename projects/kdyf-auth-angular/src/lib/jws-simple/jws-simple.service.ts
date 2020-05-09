@@ -9,6 +9,7 @@ import {Store} from '@ngrx/store';
 // Modules
 import {JwtHelperService} from '@auth0/angular-jwt';
 // Others
+import {ProviderType} from '../shared/models/provider.enum';
 import {Configuration} from '../shared/models/configuration.model';
 import {AuthenticateResponse, AuthenticateByLogin, User} from '../shared/models/auth.models';
 
@@ -17,10 +18,14 @@ const jwtHelper = new JwtHelperService();
 @Injectable()
 export class JwsSimpleService {
 
+  config: Configuration;
 
   constructor(private http: HttpClient,
               private store: Store<any>,
-              @Inject('authConfig') private config: Configuration) {
+              @Inject('authConfig') private configuration: Configuration[]) {
+
+    const index = this.configuration.findIndex((item: Configuration) => item.providerType === ProviderType.JwsSimple);
+    this.config = this.configuration[index];
 
   }
 
