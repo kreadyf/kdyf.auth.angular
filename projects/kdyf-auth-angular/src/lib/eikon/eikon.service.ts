@@ -67,14 +67,14 @@ export class EikonService {
       .set('client_id', config.clientId)
       .set('client_secret', config.clientSecret);
 
-    if (grantType == GrantType.PASSWORD) {
-      let passwordCredentials = <AuthenticateByLogin> credentials;
+    if (grantType === GrantType.PASSWORD) {
+      const passwordCredentials = <AuthenticateByLogin> credentials;
       body = body.set('grant_type', 'password')
         .set('username', passwordCredentials.username)
         .set('password', passwordCredentials.password)
         .set('acr_values', `tenant:${passwordCredentials.tenant} authtype:${config.authType}`);
-    } else if (grantType == GrantType.SAML) {
-      let samlCredentials = <AuthenticateBySamlToken> credentials;
+    } else if (grantType === GrantType.SAML) {
+      const samlCredentials = <AuthenticateBySamlToken> credentials;
       body = body.set('grant_type', 'saml')
         .set('SAMLResponse', samlCredentials.samlToken);
 

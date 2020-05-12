@@ -26,4 +26,6 @@ export class AuthConfig {
     required: boolean;
   };
 
+  pathLogin?: string;
+
 }

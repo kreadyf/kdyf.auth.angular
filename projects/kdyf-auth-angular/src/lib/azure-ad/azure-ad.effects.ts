@@ -1,6 +1,6 @@
 // Angular
 import {Router} from '@angular/router';
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 // RXJS
 import {of} from 'rxjs';
 import {catchError, exhaustMap, filter, map, withLatestFrom} from 'rxjs/operators';
@@ -13,15 +13,23 @@ import {AuthAzureAdService} from './auth-azure-ad.service';
 // Others
 import {ProviderType} from '../shared/models/provider.enum';
 import {GrantType} from '../shared/models/auth.grant-type.enum';
+import {Configuration} from '../shared/models/configuration.model';
 import {AuthenticateByLogin, AuthenticateBySamlToken} from '../shared/models/auth.models';
 
 @Injectable()
 export class AzureAdEffects {
 
+  config: Configuration;
+
   constructor(private actions$: Actions,
               private service: AuthAzureAdService,
               private router: Router,
-              private store: Store<any>) {
+              private store: Store<any>,
+              @Inject('authConfig') private configuration: Configuration[]) {
+
+    const index = this.configuration.findIndex((item: Configuration) => item.providerType === ProviderType.AzureAd);
+    this.config = this.configuration[index];
+
   }
 
   @Effect()
@@ -32,7 +40,7 @@ export class AzureAdEffects {
     filter((action: any) => action.payload.typeAuth === ProviderType.AzureAd),
     withLatestFrom(this.store),
     map(([action, storeState]) => new authActions.LoginRedirect({
-      urlRedirect: this.router.url !== '/eikon/login' ? this.router.url : storeState.auth.urlRedirect,
+      urlRedirect: this.router.url !== this.config.authConfig.pathLogin ? this.router.url : storeState.auth.urlRedirect,
       typeAuth: ProviderType.AzureAd
     }))
   );
