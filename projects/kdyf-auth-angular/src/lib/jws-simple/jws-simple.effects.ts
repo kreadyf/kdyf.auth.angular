@@ -27,7 +27,10 @@ export class JwsSimpleEffects {
   logout$ = this.actions$.pipe(
     ofType(authActions.AuthActionTypes.Logout, authActions.AuthActionTypes.AuthenticationFailure),
     filter((action: any) => action.payload.typeAuth === ProviderType.JwsSimple),
-    map(param => new authActions.LoginRedirect({urlRedirect: null, typeAuth: ProviderType.JwsSimple}))
+    map(param => new authActions.LoginRedirect({
+      urlRedirect: null,
+      typeAuth: ProviderType.JwsSimple
+    }))
   );
 
   @Effect()
@@ -37,8 +40,15 @@ export class JwsSimpleEffects {
     map((action: authActions.Login) => action.payload),
     exhaustMap((param: { credentials: AuthenticateByLogin }) =>
       this.service.login(param.credentials).pipe(
-        map(success => new authActions.AuthenticationSuccess(success)),
-        catchError(error => of(new authActions.AuthenticationFailure(error)))
+        map(success => new authActions.AuthenticationSuccess({
+          user: success.user,
+          authenticate: success.authenticate,
+          typeAuth: ProviderType.JwsSimple
+        })),
+        catchError(error => of(new authActions.AuthenticationFailure({
+          validation: error,
+          typeAuth: ProviderType.JwsSimple
+        })))
       )
     )
   );
@@ -49,7 +59,10 @@ export class JwsSimpleEffects {
     filter((action: any) => action.payload.typeAuth === ProviderType.JwsSimple),
     withLatestFrom(this.store),
     map(([action, storeState]) =>
-      new authActions.AuthenticationFailure({validation: 'temp', typeAuth: ProviderType.JwsSimple})
+      new authActions.AuthenticationFailure({
+        validation: 'temp',
+        typeAuth: ProviderType.JwsSimple
+      })
     )
   );
 

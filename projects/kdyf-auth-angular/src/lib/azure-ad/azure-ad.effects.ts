@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {Injectable} from '@angular/core';
 // RXJS
 import {of} from 'rxjs';
-import {exhaustMap, map, catchError, withLatestFrom, filter} from 'rxjs/operators';
+import {catchError, exhaustMap, filter, map, withLatestFrom} from 'rxjs/operators';
 // NGRX
 import {Store} from '@ngrx/store';
 import * as authActions from '../auth.actions';
@@ -45,7 +45,7 @@ export class AzureAdEffects {
     exhaustMap((param: {
         grantType: GrantType,
         credentials: AuthenticateByLogin | AuthenticateBySamlToken,
-        typeAuth: ProviderType,
+        typeAuth: ProviderType.AzureAd,
         keepLoggedIn: boolean
       }) =>
         this.service.login(param.grantType, param.credentials).pipe(
@@ -55,7 +55,8 @@ export class AzureAdEffects {
             typeAuth: ProviderType.AzureAd
           })),
           catchError(error => of(new authActions.AuthenticationFailure({
-            validation: error, typeAuth: ProviderType.AzureAd
+            validation: error,
+            typeAuth: ProviderType.AzureAd
           })))
         )
     )
@@ -72,7 +73,10 @@ export class AzureAdEffects {
           refreshToken: (JSON.parse(localStorage.getItem('authenticate'))).refreshToken,
           typeAuth: ProviderType.AzureAd
         })
-        : new authActions.AuthenticationFailure({validation: 'no-refresh-token', typeAuth: ProviderType.AzureAd})
+        : new authActions.AuthenticationFailure({
+          validation: 'no-refresh-token',
+          typeAuth: ProviderType.AzureAd
+        })
     )
   );
 
@@ -94,12 +98,17 @@ export class AzureAdEffects {
         return action.authToken
           ? this.service.checkAndUpdateAuthorization().pipe(
             map(policies => new authActions.AuthorizationSuccess({
-              policies: policies, typeAuth: ProviderType.AzureAd
+              policies: policies,
+              typeAuth: ProviderType.AzureAd
             })),
             catchError(error => of(new authActions.AuthorizationFailure({
-              validation: error, typeAuth: ProviderType.AzureAd
+              validation: error,
+              typeAuth: ProviderType.AzureAd
             }))))
-          : of(new authActions.AuthorizationSuccess({policies: []}));
+          : of(new authActions.AuthorizationSuccess({
+            policies: [],
+            typeAuth: ProviderType.AzureAd
+          }));
       }
     )
   );
