@@ -1,27 +1,100 @@
-# Libraries
+# KDYF-AUTH-ANGULAR
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.0.
+## Versions
 
-## Development server
+| Angular| @kreadyf/auth-angular|
+| ------|:------:| 
+| >=9.0.0 <10.0.0 | v5.x |
+| >=8.0.0 <9.0.0  | v5.x |
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Getting started
+### Step 1: Install `@kreadyf/auth-angular`:
 
-## Code scaffolding
+#### NPM
+```shell
+npm install --save @kreadyf/auth-angular
+```
+#### YARN
+```shell
+yarn add @kreadyf/auth-angular
+```
+### Step 2: Configuration environment:
+You have three options to login, you can use just one or all
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```js
+import {ProviderType} from '@kreadyf/auth-angular';
 
-## Build
+export const environment = {
+  production: false,
+  ...
+  kdyfAuth: [
+    {
+      providerId: 'test1',
+      providerType: ProviderType.AzureAd,
+      authConfig: {
+        loginUrl: 'https://my-server1/api/auth/'
+      }
+    },
+    {
+      providerId: 'test2',
+      providerType: ProviderType.Eikon,
+      authConfig: {
+        loginUrl: 'https://my-server2/api/auth/'
+      }
+    },
+    {
+      providerId: 'test3',
+      providerType: ProviderType.JwsSimple,
+      authConfig: {
+        loginUrl: 'https://my-server3/api/auth/'
+      }
+    }
+  ]
+};
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+### Step 3: Import AuthModule:
+```js
+import {AuthModule} from '@kreadyf/auth-angular';
 
-## Running unit tests
+@NgModule({
+  declarations: [AppComponent],
+  imports: [AuthModule.forRoot(environment.kdyfAuth)],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Basic login example:
+```js
+import {ProviderType} from '@kreadyf/auth-angular';
+import * as authActions from '@kreadyf/auth-angular';
+import {AuthActionTypes} from '@kreadyf/auth-angular';
 
-## Running end-to-end tests
+    // Send data to login
+    this.store.dispatch(
+      new authActions.Login({
+        credentials: {username: my-email, password: my-password},
+        typeAuth: ProviderType.JwsSimple
+    }));
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+    // Listen success login
+    this.actions.pipe(
+      filter(s => s.type === AuthActionTypes.AuthenticationSuccess),
+      tap(() => ...)
+    ).subscribe();
 
-## Further help
+    // Listen failure login
+    this.actions.pipe(
+      filter(s => s.type === AuthActionTypes.AuthenticationFailure),
+      tap(s => ...)
+    ).subscribe();
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```
+
+## Contributing
+
+Contributions are welcome.
+
+## Inspiration
+This component is inspired by KREADYF SRL
