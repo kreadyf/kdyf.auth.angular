@@ -1,5 +1,5 @@
 // NGRX
-import {AuthState} from './azure-ad.reducer';
+import {AuthState} from './auth.reducer';
 import {ActionReducer, MetaReducer} from '@ngrx/store';
 import {localStorageSync} from 'ngrx-store-localstorage';
 
