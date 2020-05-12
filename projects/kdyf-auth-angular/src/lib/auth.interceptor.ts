@@ -6,15 +6,15 @@ import {BehaviorSubject, Observable, throwError, timer} from 'rxjs';
 import {catchError, exhaustMap, finalize, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 // NGRX
 import {ofType} from '@ngrx/effects';
-import * as authActions from '../auth.actions';
+import * as authActions from './auth.actions';
 import {ActionsSubject, Store} from '@ngrx/store';
 // Services
-import {AuthAzureAdService} from './auth-azure-ad.service';
+import {AuthAzureAdService} from './azure-ad/auth-azure-ad.service';
 // Others
-import {ProviderType} from '../shared/models/provider.enum';
+import {ProviderType} from './shared/models/provider.enum';
 
 @Injectable()
-export class AzureAdAuthInterceptor implements HttpInterceptor {
+export class AuthInterceptor implements HttpInterceptor {
 
   isRefreshingToken: boolean = false;
   heartbeatSubs = new BehaviorSubject(null);

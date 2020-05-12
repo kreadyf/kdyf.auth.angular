@@ -1,7 +1,7 @@
 // NGRX
-import {AuthActions, AuthActionTypes} from '../auth.actions';
+import {AuthActions, AuthActionTypes} from './auth.actions';
 // Others
-import {User, AuthenticateResponse} from '../shared/models/auth.models';
+import {User, AuthenticateResponse} from './shared/models/auth.models';
 
 export interface AuthState {
   user: User | undefined;

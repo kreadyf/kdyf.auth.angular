@@ -42,8 +42,15 @@ export class EikonEffects {
     map((action: authActions.Login) => action.payload),
     exhaustMap((param: { grantType: GrantType, credentials: AuthenticateByLogin | AuthenticateBySamlToken }) =>
       this.service.login(param.grantType, param.credentials).pipe(
-        map(success => new authActions.AuthenticationSuccess(success)),
-        catchError(error => of(new authActions.AuthenticationFailure(error)))
+        map(success => new authActions.AuthenticationSuccess({
+          user: success.user,
+          authenticate: success.authenticate,
+          typeAuth: ProviderType.Eikon
+        })),
+        catchError(error => of(new authActions.AuthenticationFailure({
+          validation: error,
+          typeAuth: ProviderType.Eikon
+        })))
       )
     )
   );
@@ -55,8 +62,14 @@ export class EikonEffects {
     withLatestFrom(this.store),
     map(([action, storeState]) =>
       storeState.auth.authenticate && storeState.auth.authenticate.refreshToken
-        ? new authActions.RefreshToken({refreshToken: storeState.auth.authenticate.refreshToken})
-        : new authActions.AuthenticationFailure({validation: 'no-refresh-token', typeAuth: ProviderType.Eikon})
+        ? new authActions.RefreshToken({
+          refreshToken: storeState.auth.authenticate.refreshToken,
+          typeAuth: ProviderType.Eikon
+        })
+        : new authActions.AuthenticationFailure({
+          validation: 'no-refresh-token',
+          typeAuth: ProviderType.Eikon
+        })
     )
   );
 
@@ -66,8 +79,15 @@ export class EikonEffects {
     filter((action: any) => action.payload.typeAuth === ProviderType.Eikon),
     exhaustMap((action: authActions.RefreshToken) =>
       this.service.refreshToken(action.payload.refreshToken).pipe(
-        map(success => new authActions.AuthenticationSuccess(success)),
-        catchError(error => of(new authActions.AuthenticationFailure(error)))
+        map(success => new authActions.AuthenticationSuccess({
+          user: success.user,
+          authenticate: success.authenticate,
+          typeAuth: ProviderType.AzureAd
+        })),
+        catchError(error => of(new authActions.AuthenticationFailure({
+          validation: error,
+          typeAuth: ProviderType.Eikon
+        })))
       )
     )
   );

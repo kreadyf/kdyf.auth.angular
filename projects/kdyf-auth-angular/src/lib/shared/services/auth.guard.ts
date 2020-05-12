@@ -19,7 +19,10 @@ export class AuthGuard implements CanActivate {
       select((s: any) => s.auth.user),
       map(user => {
         if (!user) {
-          this.store.dispatch(new authActions.LoginRedirect({urlRedirect: undefined}));
+          this.store.dispatch(new authActions.LoginRedirect({
+            urlRedirect: undefined,
+            typeAuth: null
+          }));
           return false;
         }
         return true;
