@@ -21,7 +21,7 @@ export class AuthGuard implements CanActivate {
         if (!user) {
           this.store.dispatch(new authActions.LoginRedirect({
             urlRedirect: undefined,
-            typeAuth: null
+            typeAuth: undefined
           }));
           return false;
         }
