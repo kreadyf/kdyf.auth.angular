@@ -36,7 +36,8 @@ export class JwsSimpleService {
       {Username: credentials.username, Password: credentials.password}
     ).pipe<{ user: User, authenticate: AuthenticateResponse }>(
       map((data: any) => {
-        return {user: data.username, authenticate: {authToken: data.token, refreshToken: undefined}};
+        console.log('TOKEN: ', jwtHelper.decodeToken(data.token));
+        return {user: this.parseToken(data.token), authenticate: {authToken: data.token, refreshToken: undefined}};
       })
     );
 
