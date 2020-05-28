@@ -36,7 +36,6 @@ export class JwsSimpleService {
       {Username: credentials.username, Password: credentials.password}
     ).pipe<{ user: User, authenticate: AuthenticateResponse }>(
       map((data: any) => {
-        console.log('TOKEN: ', jwtHelper.decodeToken(data.token));
         return {user: this.parseToken(data.token), authenticate: {authToken: data.token, refreshToken: undefined}};
       })
     );
@@ -45,7 +44,7 @@ export class JwsSimpleService {
 
   parseToken(token: string): User {
     const obj = jwtHelper.decodeToken(token);
-    return {username: obj.unique_name, email: obj.email, displayName: obj.display_name, roles: obj.roles};
+    return {username: obj.username, email: obj.email, displayName: obj.displayName, roles: obj.roles};
   }
 
 }
